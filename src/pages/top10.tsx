@@ -11,7 +11,7 @@ interface ITop10{
 	products: IProducts[];
 }
 
-const Top10: React.FC = ({ products }: ITop10) => {
+const Top10: React.FC<ITop10> = ({ products }: ITop10) => {
 	return(
 		<>
 		<h1>Top 10 products</h1>
@@ -31,8 +31,7 @@ export const getStaticProps: GetStaticProps<ITop10> = async(context) => {
 		props: {
 			products: responseFormatted
 		},
-
-		revaldate: 5
+		revalidate: 60
 	});
 };
 
