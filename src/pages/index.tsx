@@ -1,4 +1,7 @@
-import Head from 'next/head';
+import React, { useCallback } from 'react';
+
+import SEO from '@/components/SEO';
+
 import { GetServerSideProps } from 'next';
 
 import { Title } from './../styles/pages/Home';
@@ -16,11 +19,19 @@ interface IHome{
 }
 
 export default function Home({ recommendedProducts }: IHome) {
+    const handleSum = useCallback(async() => {
+        const math = (await import('./../lib/math')).default;
+
+        alert(math.sum(3,2));
+    }, []);
+
     return (
     	<>
-    	<Head>
-    		<title>Next Course</title>
-    	</Head>
+        <SEO 
+            title="eaeman" 
+            description="the best site forever (I think kkk)"
+            image="https://cdn.discordapp.com/avatars/325362346761519117/6c847bca7f4dcb16c4005788962622ae.png?size=512"
+        />
 
         {recommendedProducts.map(product => (
             <div key={product.id}>
@@ -28,12 +39,14 @@ export default function Home({ recommendedProducts }: IHome) {
                 <Title>R$ {product.price}</Title>
             </div>
         ))}
+
+        <button onClick={handleSum}>Soma</button>
         </>
     )
 }
 
 export const getServerSideProps: GetServerSideProps<IHome> = async () => {
-    const response = await fetch('http://localhost:3333/recommended');
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/recommended`);
     const responseFormatted = await response.json();
 
     return({
