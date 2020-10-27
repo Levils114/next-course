@@ -1,8 +1,14 @@
 import React, { useCallback } from 'react';
 
+import Prismic from 'prismic-javascript';
+import { Document } from 'prismic-javascript/types/documents';
+
+import { client } from './../lib/prismic';
+
 import SEO from '@/components/SEO';
 
 import { GetServerSideProps } from 'next';
+import Link from 'next/link';
 
 import { Title } from './../styles/pages/Home';
 
@@ -15,7 +21,7 @@ interface IRecommendedProducts{
 }
 
 interface IHome{
-    recommendedProducts: IRecommendedProducts[];
+    recommendedProducts: Document[];
 }
 
 export default function Home({ recommendedProducts }: IHome) {
@@ -35,8 +41,12 @@ export default function Home({ recommendedProducts }: IHome) {
 
         {recommendedProducts.map(product => (
             <div key={product.id}>
-                <Title>{product.title}</Title>
-                <Title>R$ {product.price}</Title>
+                <Link href={`/catalog/products/${product.uid}`}>
+                    <a>
+                        <Title>{product.data.title[0].text}</Title>
+                    </a>
+                </Link>
+                <Title>R$ {product.data.price}</Title>
             </div>
         ))}
 
@@ -46,12 +56,13 @@ export default function Home({ recommendedProducts }: IHome) {
 }
 
 export const getServerSideProps: GetServerSideProps<IHome> = async () => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/recommended`);
-    const responseFormatted = await response.json();
+    const recommendedProducts = await client().query([
+        Prismic.Predicates.at('document.type', 'product')
+    ]);
 
     return({
         props: {
-            recommendedProducts: responseFormatted
+            recommendedProducts: recommendedProducts.results
         }
     });
 }

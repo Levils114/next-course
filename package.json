@@ -11,6 +11,8 @@
   "dependencies": {
     "json-server": "^0.16.2",
     "next": "9.5.5",
+    "prismic-dom": "^2.2.4",
+    "prismic-javascript": "^3.0.2",
     "react": "16.14.0",
     "react-dom": "16.14.0",
     "styled-components": "^5.2.0"
