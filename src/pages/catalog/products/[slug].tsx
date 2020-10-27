@@ -1,36 +1,58 @@
-import React, { useCallback, useState } from 'react';
+import React from 'react';
+
+import { client } from '@/lib/prismic';
+import Prismic from 'prismic-javascript';
+import { Document } from 'prismic-javascript/types/documents';
 
 import { useRouter } from 'next/router';
-import dynamic from 'next/dynamic';
+import { GetStaticProps, GetStaticPaths } from 'next';
 
-const AddToCardModal = dynamic(
-	() => import('@/components/AddToCardModal'), 
-	{
-		loading: () => (<p>loading...</p>),
-		ssr: false
-	}
-);
+interface IProducts{
+	product: Document;
+}
 
-const Product: React.FC = () => {
+const Product: React.FC<IProducts> = ({ product }: IProducts) => {
 	const router = useRouter();
 
-	const [showModalAddToCard, setShowModalAddToCard] = useState(false);
-
-	const handleAddToCard = useCallback(() => {
-		setShowModalAddToCard(true);
-	}, []);
+	if(router.isFallback){
+		return (<p>Loading</p>);
+	}
 
 	return(
 		<div>
-			<h1>O produto é {router.query.slug}</h1>
+			<h1>O produto é {product.data.title[0].text}</h1>
 
-			<button onClick={handleAddToCard}>Add to card</button>
+			<img src={product.data.thubnail.list.url} width="300" alt={product.data.title[0].text}/>
+			<p>R$ {product.data.price}</p>
 
-			{!!showModalAddToCard && (
-				<AddToCardModal />
-			)}
+			{product.data.description.map(descriptionFinded => (
+				<h4>{descriptionFinded.text}</h4>
+			))}
 		</div>
 	);
 }
+
+export const getStaticPaths: GetStaticPaths = async () => {
+	return({
+		paths: [],
+		fallback: true
+	});
+};
+
+
+export const getStaticProps: GetStaticProps<IProducts> = async(context) => {
+	const { slug } = context.params;
+
+	const product = await client().getByUID('product', String(slug), {});
+
+	console.log(product);
+
+	return({
+		props: {
+			product
+		},
+		revalidate: 5
+	});
+};
 
 export default Product;
